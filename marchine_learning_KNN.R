@@ -52,20 +52,21 @@ ggplot(
 # Phase4 : Calculate the values required for KNN learning
 # 階段4 : 計算出KNN機器學習所需數據
 # ====================================================
-# Calculate frature avg、sd計算特徵的平均值與標準差
+# Calculate frature avg、sd 計算特徵的平均值與標準差
 avg_age <- mean(knn_df$age_year) # age avg
 sd_age <- sd(knn_df$age_year) # income sd
 avg_income <- mean(knn_df$income_million) # income avg
 sd_income <- sd(knn_df$income_million) # income sd
 
-# Change col type調整欄位型態
+# Change col type 調整欄位型態
 knn_df$age_year <- as.numeric(knn_df$age_year) # convert to num
 knn_df$income_million <- as.numeric(knn_df$income_million) # convert to num
 
 # Unit standardization and create knn_df cols  knn_df進行單位標準化
+
 knn_df <- knn_df %>%
-    mutate(
-        age_stand = (knn_df$age_year - avg_age) / sd_age, # 平均年收減平均年齡除以年齡標準差
+    mutate( # 平均年收減平均年齡除以年齡標準差，Average annual income minus average age divided by the standard deviation of age
+        age_stand = (knn_df$age_year - avg_age) / sd_age,
         income_stand = (knn_df$income_million - avg_income) / sd_income
     )
 
@@ -76,7 +77,7 @@ predict_df <- predict_df %>%
         income_stand = (predict_df$income - avg_income) / sd_income
     )
 
-# knn_df增加相似度欄位
+# Create similarity col knn_df增加相似度欄位
 knn_df <- knn_df %>%
     mutate(
         similarity = (sqrt((predict_df$age_stand - knn_df$age_stand)^2 + (predict_df$income_stand - knn_df$income_stand)^2))
@@ -92,10 +93,10 @@ knn_df$income_stand
 knn_df$similarity
 predict_df
 
-# 將相關性最符合的數據存入
+# 找出最接近預測數據之值
 correlation_df <- min(knn_df$similarity)
 
-# 找出符合數值的數據位置
+# 確定符合數值的數據位置
 accord_loc <- which(knn_df$similarity == correlation_df)
 
 # 存入符合的數據列
